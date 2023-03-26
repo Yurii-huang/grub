@@ -25,12 +25,12 @@ _GRUB_EMU_BUILD="1"
 
 pkgname=grub
 pkgdesc="GNU GRand Unified Bootloader (2)"
-_commit='2f4430cc0a44fd8c8aa7aee5c51887667ad3d6c3'
+_commit='65bc45963014773e2062ccc63ff34a089d2e352e'
 _unifont_ver='15.0.01'
-_pkgver=2.06.r261.g2f4430cc0
+_pkgver=2.06.r456.g65bc45963
 pkgver=${_pkgver/-/}
-pkgrel=3
-arch=('x86_64' 'i686' 'aarch64')
+pkgrel=1
+arch=('x86_64' 'aarch64')
 url='https://www.gnu.org/software/grub/'
 license=('GPL3')
 backup=('etc/default/grub'
@@ -67,6 +67,8 @@ source=("git+https://git.savannah.gnu.org/git/grub.git#commit=${_commit}"
         'git+https://git.savannah.gnu.org/git/gnulib.git'
         "https://ftp.gnu.org/gnu/unifont/unifont-${_unifont_ver}/unifont-${_unifont_ver}.bdf.gz"{,.sig}
         '0001-00_header-add-GRUB_COLOR_-variables.patch'
+        'grub.default'
+        'sbat.csv'
         'grub-export-path.patch'
         'grub-manjaro-modifications.patch'
         'grub-use-efivarfs.patch'
@@ -75,8 +77,6 @@ source=("git+https://git.savannah.gnu.org/git/grub.git#commit=${_commit}"
         '0002-grub-gettext_quiet.patch'
         '0003-grub-quick-boot.patch'
         'background.png'
-        'grub.default'
-        'sbat.csv'
         'grub.cfg'
         'update-grub'
         'grub-set-bootflag'
@@ -87,22 +87,25 @@ sha256sums=('SKIP'
             '1fddba900a36b8a067bf2177b05c4a2482a0f7ca1545cf531c03509f47ce1590'
             'SKIP'
             '5dee6628c48eef79812bb9e86ee772068d85e7fcebbd2b2b8d1e19d24eda9dab'
+            '6b242bc7f232ef91da255658042991a73ff1505dd552ff732c11f60ebf082b6d'
+            '89bbfe11cec0a07f5b0f170cde35abcc4cbf16d8db7b4920435525f71527fc10'
             '63c611189a60d68c6ae094f2ced91ac576b3921b7fd2e75a551c2dc6baefc35e'
-            '40f23e1a36fd4f9821d63bdec0c4334aeb3ceddde15857a21c97c0002fd4900f'
+            'b2f81a9bf63ec4dd0d7b0dc48225acfd536b4087fabf82f373706d6a5d00eb36'
             '20b2b6e7f501596b5cce6ffa05906980427f760c03d308d0e045cf2ecf47bb0e'
-            'ddfda7c170fe386fa340440178096260ae72b5cbab23f2566634b7c54f812a07'
+            '07cfbfecd00972ea56a15c5d3312f60107609181d5b1c87a60690c22846d73f9'
             'a522514edb264374c8cce08998c5586ffc832091c5db1be7bf8b21078223e2a6'
             '39d7843dfe1e10ead912a81be370813b8621794a7967b3cc5e4d4188b5bf7264'
             '4cae03685c238a60169f1134165ff010faebddb5b3218d92d32e0b6729b27656'
             '01264c247283b7bbdef65d7646541c022440ddaf54f8eaf5aeb3a02eb98b4dd8'
-            'c9a22df3e437599851e3c3e5725b853e8cd36728ae8fce8af5e693f4ce7c8e44'
-            '89bbfe11cec0a07f5b0f170cde35abcc4cbf16d8db7b4920435525f71527fc10'
             '7fc95d49c0febe98a76e56b606a280565cb736580adecf163bc6b5aca8e7cbd8'
             'a6a3e6a7c2380aff66b6096d478aed790c927ceed551ce52c0c454191eb4e3aa'
             '2eb199f510340cf8d190ba2fa80d5bdcf1e2e7ca53e8011af2ee62ea3b8dd03b'
             'a97ddf6694fa5070463a2d3f997205436a63fbe125071dd1bef0d59999adff70')
             
 _backports=(
+)
+
+_reverts=(
 )
 
 _configure_options=(
@@ -142,7 +145,14 @@ prepare() {
 		git cherry-pick -n "${_c}"
 	done
 
-	echo "Patch to enable GRUB_COLOR_* variables in grub-mkconfig..."
+	echo "Apply reverts..."
+	local _c
+	for _c in "${_reverts[@]}"; do
+		git log --oneline -1 "${_c}"
+		git revert -n "${_c}"
+	done
+
+	echo "Enable GRUB_COLOR_* variables in grub-mkconfig..."
 	## Based on http://lists.gnu.org/archive/html/grub-devel/2012-02/msg00021.html
 	patch -Np1 -i "${srcdir}/0001-00_header-add-GRUB_COLOR_-variables.patch"
 
@@ -150,10 +160,10 @@ prepare() {
 	echo "Use efivarfs modules"
 	patch -Np1 -i "${srcdir}/grub-use-efivarfs.patch"
 
-	echo "Patch to export $PATH"
+	echo "Export $PATH"
 	patch -Np1 -i "${srcdir}/grub-export-path.patch"
 
-	echo "Patch to include Manjaro Linux Modifications"
+	echo "Include Manjaro Linux Modifications"
 	patch -Np1 -i "${srcdir}/grub-manjaro-modifications.patch"
 
 	echo "fgrep is obsolescent using grep -F"

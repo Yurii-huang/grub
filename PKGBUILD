@@ -29,7 +29,7 @@ _commit='65bc45963014773e2062ccc63ff34a089d2e352e'
 _unifont_ver='15.0.01'
 _pkgver=2.06.r456.g65bc45963
 pkgver=${_pkgver/-/}
-pkgrel=1
+pkgrel=2
 arch=('x86_64' 'aarch64')
 url='https://www.gnu.org/software/grub/'
 license=('GPL3')
@@ -72,6 +72,7 @@ source=("git+https://git.savannah.gnu.org/git/grub.git#commit=${_commit}"
         'grub-export-path.patch'
         'grub-manjaro-modifications.patch'
         'grub-use-efivarfs.patch'
+        'grub-dont-call-fwsetup-at-all.patch'
         'fgrep-is-obsolescent-using-grep-F.patch'
         '0001-grub-maybe_quiet.patch'
         '0002-grub-gettext_quiet.patch'
@@ -92,6 +93,7 @@ sha256sums=('SKIP'
             '63c611189a60d68c6ae094f2ced91ac576b3921b7fd2e75a551c2dc6baefc35e'
             'b2f81a9bf63ec4dd0d7b0dc48225acfd536b4087fabf82f373706d6a5d00eb36'
             '20b2b6e7f501596b5cce6ffa05906980427f760c03d308d0e045cf2ecf47bb0e'
+            '8e1a99b6469ddae522891a084d680a2b37f34504f1010213474acedb16e40921'
             '07cfbfecd00972ea56a15c5d3312f60107609181d5b1c87a60690c22846d73f9'
             'a522514edb264374c8cce08998c5586ffc832091c5db1be7bf8b21078223e2a6'
             '39d7843dfe1e10ead912a81be370813b8621794a7967b3cc5e4d4188b5bf7264'
@@ -160,8 +162,13 @@ prepare() {
 	echo "Use efivarfs modules"
 	patch -Np1 -i "${srcdir}/grub-use-efivarfs.patch"
 
-	echo "Export $PATH"
+	echo 'Export $PATH'
 	patch -Np1 -i "${srcdir}/grub-export-path.patch"
+	
+	# https://bugs.archlinux.org/task/75701
+	# https://lists.gnu.org/archive/html/grub-devel/2022-08/msg00374.html
+	echo "Don't call fwsetup at all"
+	patch -Np1 -i "${srcdir}/grub-dont-call-fwsetup-at-all.patch"
 
 	echo "Include Manjaro Linux Modifications"
 	patch -Np1 -i "${srcdir}/grub-manjaro-modifications.patch"

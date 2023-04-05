@@ -9,9 +9,9 @@ post_install() {
   fi
 
   cat <<EOM
-:: Install your bootloader and generate configuration with:
-     \$ grub-install ...
-     \$ update-grub
+:: Install your bootloader and generate configuration:
+     UEFI: https://wiki.archlinux.org/title/GRUB#Installation
+     BIOS: https://wiki.archlinux.org/title/GRUB#Installation_2
 EOM
 }
 

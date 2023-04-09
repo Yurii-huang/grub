@@ -105,7 +105,7 @@ index e8b01c0d0..c3dd34a59 100644
  case "$machine" in
      i?86) GENKERNEL_ARCH="x86" ;;
      mips|mips64) GENKERNEL_ARCH="mips" ;;
-@@ -202,6 +211,25 @@ while [ "x$list" != "x" ] ; do
+@@ -202,6 +211,29 @@ while [ "x$list" != "x" ] ; do
    alt_version=`echo $version | sed -e "s,\.old$,,g"`
    linux_root_device_thisversion="${LINUX_ROOT_DEVICE}"
  
@@ -125,6 +125,10 @@ index e8b01c0d0..c3dd34a59 100644
 +    kbasename4="`echo "${basename}" | sed -e 's,vmlinuz-,linux-,g' | sed -e 's,\.,,g'`"
 +    if test -e "${dirname}/${kbasename4}.kver" ; then
 + 	version="$(cat ${dirname}/${kbasename4}.kver)"
++    fi
++    kbasename5="`echo "${basename}" | sed -e 's,vmlinuz-,,g'`"
++    if test -e "${dirname}/${kbasename5}.kver" ; then
++ 	version="$(cat ${dirname}/${kbasename5}.kver)"
 +    fi
 +  fi
 +

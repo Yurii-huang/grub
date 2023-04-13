@@ -29,7 +29,7 @@ _commit='65bc45963014773e2062ccc63ff34a089d2e352e'
 _unifont_ver='15.0.01'
 _pkgver=2.06.r456.g65bc45963
 pkgver=${_pkgver/-/}
-pkgrel=5
+pkgrel=6
 arch=('x86_64' 'aarch64')
 url='https://www.gnu.org/software/grub/'
 license=('GPL3')
@@ -100,7 +100,7 @@ sha256sums=('SKIP'
             '4cae03685c238a60169f1134165ff010faebddb5b3218d92d32e0b6729b27656'
             '01264c247283b7bbdef65d7646541c022440ddaf54f8eaf5aeb3a02eb98b4dd8'
             '7fc95d49c0febe98a76e56b606a280565cb736580adecf163bc6b5aca8e7cbd8'
-            'a6a3e6a7c2380aff66b6096d478aed790c927ceed551ce52c0c454191eb4e3aa'
+            'c9027a993fe19a023bc6560aaee21487d97388d7997ba02db5c947bd0a5bdc12'
             '2eb199f510340cf8d190ba2fa80d5bdcf1e2e7ca53e8011af2ee62ea3b8dd03b'
             'a97ddf6694fa5070463a2d3f997205436a63fbe125071dd1bef0d59999adff70')
             

@@ -27,9 +27,9 @@ pkgname=grub
 pkgdesc="GNU GRand Unified Bootloader (2)"
 _commit='65bc45963014773e2062ccc63ff34a089d2e352e'
 _unifont_ver='15.0.01'
-_pkgver=2.06.r456.g65bc45963
+_pkgver=2.06.r499.ge67a551a4
 pkgver=${_pkgver/-/}
-pkgrel=6
+pkgrel=1
 arch=('x86_64' 'aarch64')
 url='https://www.gnu.org/software/grub/'
 license=('GPL3')
@@ -114,7 +114,6 @@ _configure_options=(
 	PACKAGE_VERSION="${pkgver}-${pkgrel}"
 	FREETYPE="pkg-config freetype2"
 	BUILD_FREETYPE="pkg-config freetype2"
-	--enable-mm-debug
 	--enable-nls
 	--enable-device-mapper
 	--enable-cache-stats

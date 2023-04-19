@@ -25,11 +25,11 @@ _GRUB_EMU_BUILD="1"
 
 pkgname=grub
 pkgdesc="GNU GRand Unified Bootloader (2)"
-_commit='65bc45963014773e2062ccc63ff34a089d2e352e'
+_commit='e67a551a48192a04ab705fca832d82f850162b64'
 _unifont_ver='15.0.01'
 _pkgver=2.06.r499.ge67a551a4
 pkgver=${_pkgver/-/}
-pkgrel=1
+pkgrel=2
 arch=('x86_64' 'aarch64')
 url='https://www.gnu.org/software/grub/'
 license=('GPL3')

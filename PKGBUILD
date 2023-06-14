@@ -29,7 +29,7 @@ _commit='e67a551a48192a04ab705fca832d82f850162b64'
 _unifont_ver='15.0.06'
 _pkgver=2.06.r499.ge67a551a4
 pkgver=${_pkgver/-/}
-pkgrel=3
+pkgrel=4
 arch=('x86_64' 'aarch64')
 url='https://www.gnu.org/software/grub/'
 license=('GPL3')
@@ -67,6 +67,7 @@ source=("git+https://git.savannah.gnu.org/git/grub.git#commit=${_commit}"
         'git+https://git.savannah.gnu.org/git/gnulib.git'
         "https://ftp.gnu.org/gnu/unifont/unifont-${_unifont_ver}/unifont-${_unifont_ver}.bdf.gz"{,.sig}
         '0001-00_header-add-GRUB_COLOR_-variables.patch'
+        '0003-support-dropins-for-default-configuration.patch'
         'grub.default'
         'sbat.csv'
         'grub-export-path.patch'
@@ -88,6 +89,7 @@ sha256sums=('SKIP'
             '93cb54fa103a00e25cd3e16550b4b4eb13cbd098e515679ade3ae82cd0739f29'
             'SKIP'
             '5dee6628c48eef79812bb9e86ee772068d85e7fcebbd2b2b8d1e19d24eda9dab'
+            'b5d9fcd62ffb3c3950fdeb7089ec2dc2294ac52e9861980ad90a437dedbd3d47'
             '6b242bc7f232ef91da255658042991a73ff1505dd552ff732c11f60ebf082b6d'
             '89bbfe11cec0a07f5b0f170cde35abcc4cbf16d8db7b4920435525f71527fc10'
             '63c611189a60d68c6ae094f2ced91ac576b3921b7fd2e75a551c2dc6baefc35e'
@@ -156,6 +158,9 @@ prepare() {
 	echo "Enable GRUB_COLOR_* variables in grub-mkconfig..."
 	## Based on http://lists.gnu.org/archive/html/grub-devel/2012-02/msg00021.html
 	patch -Np1 -i "${srcdir}/0001-00_header-add-GRUB_COLOR_-variables.patch"
+
+	echo "Patch to support dropins for default configuration..."
+	patch -Np1 -i "${srcdir}/0003-support-dropins-for-default-configuration.patch"
 
 	# https://github.com/calamares/calamares/issues/918
 	echo "Use efivarfs modules"

@@ -25,11 +25,11 @@ _GRUB_EMU_BUILD="1"
 
 pkgname=grub
 pkgdesc="GNU GRand Unified Bootloader (2)"
-_commit='e67a551a48192a04ab705fca832d82f850162b64'
+_commit='6425c12cd77ad51ad24be84c092aefacf0875089'
 _unifont_ver='15.0.06'
-_pkgver=2.06.r499.ge67a551a4
+_pkgver=2.06.r591.g6425c12cd
 pkgver=${_pkgver/-/}
-pkgrel=4
+pkgrel=1
 arch=('x86_64' 'aarch64')
 url='https://www.gnu.org/software/grub/'
 license=('GPL3')
@@ -42,10 +42,10 @@ provides=('grub-common' 'grub-bios' 'grub-emu' "grub-efi-${_EFI_ARCH}")
 conflicts=('grub-common' 'grub-bios' 'grub-emu' "grub-efi-${_EFI_ARCH}" 'grub-legacy')
 replaces=('grub-common' 'grub-bios' 'grub-emu' "grub-efi-${_EFI_ARCH}")
 makedepends=('git' 'rsync' 'xz' 'freetype2' 'ttf-dejavu' 'python' 'autogen'
-             'texinfo' 'help2man' 'gettext' 'device-mapper' 'fuse2')
+             'texinfo' 'help2man' 'gettext' 'device-mapper' 'fuse3')
 depends=('sh' 'xz' 'gettext' 'device-mapper')
 optdepends=('freetype2: For grub-mkfont usage'
-            'fuse2: For grub-mount usage'
+            'fuse3: For grub-mount usage'
             'dosfstools: For grub-mkrescue FAT FS and EFI support'
             'lzop: For grub-mkrescue LZO support'
             'efibootmgr: For grub-install EFI support'
@@ -159,7 +159,7 @@ prepare() {
 	## Based on http://lists.gnu.org/archive/html/grub-devel/2012-02/msg00021.html
 	patch -Np1 -i "${srcdir}/0001-00_header-add-GRUB_COLOR_-variables.patch"
 
-	echo "Patch to support dropins for default configuration..."
+	echo "Support dropins for default configuration..."
 	patch -Np1 -i "${srcdir}/0003-support-dropins-for-default-configuration.patch"
 
 	# https://github.com/calamares/calamares/issues/918

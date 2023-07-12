@@ -23,11 +23,12 @@ _GRUB_EMU_BUILD="1"
 [[ "${CARCH}" == 'i686' ]] && _EMU_ARCH='i386'
 [[ "${CARCH}" == 'aarch64' ]] && _EMU_ARCH='aarch64'
 
-pkgname=grub
+pkgbase=grub
+pkgname=('grub' 'grub-update')
 pkgdesc="GNU GRand Unified Bootloader (2)"
-_commit='6425c12cd77ad51ad24be84c092aefacf0875089'
 _unifont_ver='15.0.06'
-_pkgver=2.06.r591.g6425c12cd
+_tag='bb59f566e1e5c387dbfd342bb3767f761422c744' # git rev-parse grub-${_pkgver}
+_pkgver=2.12rc1
 pkgver=${_pkgver/-/}
 pkgrel=1
 arch=('x86_64' 'aarch64')
@@ -63,7 +64,7 @@ validpgpkeys=('E53D497F3FA42AD8C9B4D1E835A93B74E82E4209'  # Vladimir 'phcoder' S
               'BE5C23209ACDDACEB20DB0A28C8189F1988C2166'  # Daniel Kiper <dkiper@net-space.pl>
               '95D2E9AB8740D8046387FD151A09227B1F435A33') # Paul Hardy <unifoundry@unifoundry.com>
 
-source=("git+https://git.savannah.gnu.org/git/grub.git#commit=${_commit}"
+source=("git+https://git.savannah.gnu.org/git/grub.git#tag=${_tag}?signed"
         'git+https://git.savannah.gnu.org/git/gnulib.git'
         "https://ftp.gnu.org/gnu/unifont/unifont-${_unifont_ver}/unifont-${_unifont_ver}.bdf.gz"{,.sig}
         '0001-00_header-add-GRUB_COLOR_-variables.patch'
@@ -335,9 +336,6 @@ _package_grub-common_and_bios() {
 	echo "Install grub.cfg for backup array"
 	install -D -m0644 "${srcdir}/grub.cfg" "${pkgdir}/boot/grub/grub.cfg"
 
-	echo "Install update-grub"
-	install -Dm755 "${srcdir}/update-grub" "${pkgdir}/usr/bin/update-grub"
-
 	echo "Install grub background"
 	install -Dm644 "${srcdir}/background.png" "${pkgdir}/usr/share/grub/background.png"	
 
@@ -377,7 +375,8 @@ _package_grub-emu() {
 	rm -f "${pkgdir}/usr/lib/grub/${_EMU_ARCH}-emu"/{kernel.exec,gdb_grub,gmodule.pl} || true
 }
 
-package() {
+package_grub() {
+	depends+=('grub-update')
 	cd "${srcdir}/grub/"
 
 	echo "Package grub ${_EFI_ARCH} efi stuff..."
@@ -400,3 +399,14 @@ package() {
 	rm "$pkgdir/usr/share/info/dir"
 }
 
+package_grub-update() {
+	pkgdesc="GNU Grub (2) Update Menu Script"
+	depends=(grub)
+	optdepends=()
+	provides=()
+	conflicts=()
+	replaces=()
+	backup=()
+	echo "Install update-grub"
+	install -Dm755 "${srcdir}/update-grub" "${pkgdir}/usr/bin/update-grub"
+}

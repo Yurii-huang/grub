@@ -27,8 +27,8 @@ pkgbase=grub
 pkgname=('grub' 'grub-update')
 pkgdesc="GNU GRand Unified Bootloader (2)"
 _unifont_ver='15.1.01'
-_tag='bb59f566e1e5c387dbfd342bb3767f761422c744' # git rev-parse grub-${_pkgver}
-_pkgver=2.12rc1
+_tag='42a831d7462ec3a114156d56ef8a03e1d47f19e7' # git rev-parse grub-${_pkgver}
+_pkgver=2.12rc1.r31.g42a831d74
 pkgver=${_pkgver/-/}
 pkgrel=1
 arch=('x86_64' 'aarch64')
@@ -64,7 +64,7 @@ validpgpkeys=('E53D497F3FA42AD8C9B4D1E835A93B74E82E4209'  # Vladimir 'phcoder' S
               'BE5C23209ACDDACEB20DB0A28C8189F1988C2166'  # Daniel Kiper <dkiper@net-space.pl>
               '95D2E9AB8740D8046387FD151A09227B1F435A33') # Paul Hardy <unifoundry@unifoundry.com>
 
-source=("git+https://git.savannah.gnu.org/git/grub.git#tag=${_tag}?signed"
+source=("git+https://git.savannah.gnu.org/git/grub.git#tag=${_tag}" #?signed"
         'git+https://git.savannah.gnu.org/git/gnulib.git'
         "https://ftp.gnu.org/gnu/unifont/unifont-${_unifont_ver}/unifont-${_unifont_ver}.bdf.gz"{,.sig}
         '0001-00_header-add-GRUB_COLOR_-variables.patch'
@@ -79,6 +79,7 @@ source=("git+https://git.savannah.gnu.org/git/grub.git#tag=${_tag}?signed"
         '0001-grub-maybe_quiet.patch'
         '0002-grub-gettext_quiet.patch'
         '0003-grub-quick-boot.patch'
+        'xfs-parsing.patch'
         'background.png'
         'grub.cfg'
         'update-grub'
@@ -101,6 +102,7 @@ sha256sums=('SKIP'
             'a522514edb264374c8cce08998c5586ffc832091c5db1be7bf8b21078223e2a6'
             '39d7843dfe1e10ead912a81be370813b8621794a7967b3cc5e4d4188b5bf7264'
             '4cae03685c238a60169f1134165ff010faebddb5b3218d92d32e0b6729b27656'
+            '92f6e19bd5c82ee7e3b134413a2492f4b9bca50ae6902f1a452705de7537d1c1'
             '01264c247283b7bbdef65d7646541c022440ddaf54f8eaf5aeb3a02eb98b4dd8'
             '7fc95d49c0febe98a76e56b606a280565cb736580adecf163bc6b5aca8e7cbd8'
             'c9027a993fe19a023bc6560aaee21487d97388d7997ba02db5c947bd0a5bdc12'
@@ -188,6 +190,9 @@ prepare() {
 	patch -Np1 -i "${srcdir}/0002-grub-gettext_quiet.patch"
 	echo "0003"
 	patch -Np1 -i "${srcdir}/0003-grub-quick-boot.patch"
+	
+	echo "Fix XFS directory entry parsing"
+	patch -Np1 -i "${srcdir}/xfs-parsing.patch"
 
 	echo "Fix DejaVuSans.ttf location so that grub-mkfont can create *.pf2 files for starfield theme..."
 	sed 's|/usr/share/fonts/dejavu|/usr/share/fonts/dejavu /usr/share/fonts/TTF|g' -i "configure.ac"

@@ -54,11 +54,19 @@ Fixes: https://savannah.gnu.org/bugs/?64376
 
 Signed-off-by: Jon DeVree <nuxi@vault24.org>
 ---
+
+Notes:
+    Changes from v2:
+    * Fix bounds check on filename
+    
+    Changes from v1:
+    * Address review feedback
+
  grub-core/fs/xfs.c | 51 +++++++++++++++++++++++++++++++++-------------
  1 file changed, 37 insertions(+), 14 deletions(-)
 
 diff --git a/grub-core/fs/xfs.c b/grub-core/fs/xfs.c
-index b91cd32b4..ac7ff0365 100644
+index b91cd32b4..acdfb1a7b 100644
 --- a/grub-core/fs/xfs.c
 +++ b/grub-core/fs/xfs.c
 @@ -223,6 +223,12 @@ struct grub_xfs_inode
@@ -74,7 +82,7 @@ index b91cd32b4..ac7ff0365 100644
  struct grub_xfs_dirblock_tail
  {
    grub_uint32_t leaf_count;
-@@ -877,9 +883,8 @@ grub_xfs_iterate_dir (grub_fshelp_node_t
+@@ -877,9 +883,8 @@ grub_xfs_iterate_dir (grub_fshelp_node_t dir,
  	  {
  	    struct grub_xfs_dir2_entry *direntry =
  					grub_xfs_first_de(dir->data, dirblock);
@@ -86,33 +94,32 @@ index b91cd32b4..ac7ff0365 100644
  
  	    numread = grub_xfs_read_file (dir, 0, 0,
  					  blk << dirblk_log2,
-@@ -890,14 +895,27 @@ grub_xfs_iterate_dir (grub_fshelp_node_t
+@@ -890,14 +895,27 @@ grub_xfs_iterate_dir (grub_fshelp_node_t dir,
  	        return 0;
  	      }
  
 -	    entries = (grub_be_to_cpu32 (tail->leaf_count)
 -		       - grub_be_to_cpu32 (tail->leaf_stale));
--
++	    /* leaf and tail information are only in the data block if the number
++	     * of extents is 1 */
++	    if (dir->inode.nextents == grub_cpu_to_be32_compile_time (1))
++	      {
++		struct grub_xfs_dirblock_tail *tail =
++		                               grub_xfs_dir_tail(dir->data, dirblock);
++		end = (char *)tail;
+ 
 -	    if (!entries)
 -	      continue;
-+           /* leaf and tail information are only in the data block if the number
-+            * of extents is 1 */
-+           if (dir->inode.nextents == grub_cpu_to_be32_compile_time (1))
-+             {
-+               struct grub_xfs_dirblock_tail *tail =
-+                                              grub_xfs_dir_tail(dir->data, dirblock);
-+               end = (char *)tail;
++		/* subtract the space used by leaf nodes */
++		end -= grub_be_to_cpu32 (tail->leaf_count) *
++		       sizeof (struct grub_xfs_dir_leaf_entry);
 +
-+               /* subtract the space used by leaf nodes */
-+               end -= grub_be_to_cpu32 (tail->leaf_count) *
-+                      sizeof (struct grub_xfs_dir_leaf_entry);
++		entries = (grub_be_to_cpu32 (tail->leaf_count)
++		           - grub_be_to_cpu32 (tail->leaf_stale));
 +
-+               entries = (grub_be_to_cpu32 (tail->leaf_count)
-+                          - grub_be_to_cpu32 (tail->leaf_stale));
-+
-+               if (!entries)
-+                 continue;
-+             }
++		if (!entries)
++		  continue;
++	      }
  
  	    /* Iterate over all entries within this block.  */
 -	    while ((char *)direntry < (char *)tail)
@@ -120,7 +127,7 @@ index b91cd32b4..ac7ff0365 100644
  	      {
  		grub_uint8_t *freetag;
  		char *filename;
-@@ -917,7 +935,7 @@ grub_xfs_iterate_dir (grub_fshelp_node_t
+@@ -917,7 +935,7 @@ grub_xfs_iterate_dir (grub_fshelp_node_t dir,
  		  }
  
  		filename = (char *)(direntry + 1);
@@ -129,7 +136,7 @@ index b91cd32b4..ac7ff0365 100644
  		  return grub_error (GRUB_ERR_BAD_FS, "invalid XFS directory entry");
  
  		/* The byte after the filename is for the filetype, padding, or
-@@ -931,11 +949,16 @@ grub_xfs_iterate_dir (grub_fshelp_node_t
+@@ -931,11 +949,16 @@ grub_xfs_iterate_dir (grub_fshelp_node_t dir,
  		    return 1;
  		  }
  
@@ -138,16 +145,16 @@ index b91cd32b4..ac7ff0365 100644
 -		entries--;
 -		if (!entries)
 -		  break;
-+               /* the expected number of directory entries is only tracked for the
-+                * single extent case */
-+               if (dir->inode.nextents == grub_cpu_to_be32_compile_time (1))
-+                 {
-+                   /* Check if last direntry in this block is
-+                      reached.  */
-+                   entries--;
-+                   if (!entries)
-+                     break;
-+                 }
++		/* the expected number of directory entries is only tracked for the
++		 * single extent case */
++		if (dir->inode.nextents == grub_cpu_to_be32_compile_time (1))
++		  {
++		    /* Check if last direntry in this block is
++		       reached.  */
++		    entries--;
++		    if (!entries)
++		      break;
++		  }
  
  		/* Select the next directory entry.  */
  		direntry = grub_xfs_next_de(dir->data, direntry);

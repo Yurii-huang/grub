@@ -30,7 +30,7 @@ _unifont_ver='15.1.02'
 _tag='e58b870ff926415e23fc386af41ff81b2f588763' # git rev-parse grub-${_pkgver}
 _pkgver=2.12rc1.r49.ge58b870ff
 pkgver=${_pkgver/-/}
-pkgrel=1
+pkgrel=2
 arch=('x86_64' 'aarch64')
 url='https://www.gnu.org/software/grub/'
 license=('GPL3')
@@ -93,7 +93,7 @@ sha256sums=('SKIP'
             '5dee6628c48eef79812bb9e86ee772068d85e7fcebbd2b2b8d1e19d24eda9dab'
             'b5d9fcd62ffb3c3950fdeb7089ec2dc2294ac52e9861980ad90a437dedbd3d47'
             '6b242bc7f232ef91da255658042991a73ff1505dd552ff732c11f60ebf082b6d'
-            '89bbfe11cec0a07f5b0f170cde35abcc4cbf16d8db7b4920435525f71527fc10'
+            'c3ff24bf4ddb70ccb29aabaf87a3acf6337aafb5bf15dbac67692db36807b98f'
             '63c611189a60d68c6ae094f2ced91ac576b3921b7fd2e75a551c2dc6baefc35e'
             '8b7aca5898280409492d85dff2db84140dc3d2d835a1f551902ccfcf091ac9ed'
             '20b2b6e7f501596b5cce6ffa05906980427f760c03d308d0e045cf2ecf47bb0e'

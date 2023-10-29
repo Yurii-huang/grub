@@ -26,7 +26,7 @@ _GRUB_EMU_BUILD="1"
 pkgbase=grub
 pkgname=('grub' 'grub-update')
 pkgdesc="GNU GRand Unified Bootloader (2)"
-_unifont_ver='15.1.03'
+_unifont_ver='15.1.04'
 _tag='e58b870ff926415e23fc386af41ff81b2f588763' # git rev-parse grub-${_pkgver}
 _pkgver=2.12rc1.r49.ge58b870ff
 pkgver=${_pkgver/-/}
@@ -88,7 +88,7 @@ source=("git+https://git.savannah.gnu.org/git/grub.git#tag=${_tag}" #?signed"
 
 sha256sums=('SKIP'
             'SKIP'
-            'f343c63509c701208385b57ef697f8e1054904e0b381ac66f515ff94f74830bb'
+            '88e00954b10528407e62e97ce6eaa88c847ebfd9a464cafde6bf55c7e4eeed54'
             'SKIP'
             '5dee6628c48eef79812bb9e86ee772068d85e7fcebbd2b2b8d1e19d24eda9dab'
             'b5d9fcd62ffb3c3950fdeb7089ec2dc2294ac52e9861980ad90a437dedbd3d47'

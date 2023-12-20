@@ -27,10 +27,9 @@ pkgbase=grub
 pkgname=('grub' 'grub-update')
 pkgdesc="GNU GRand Unified Bootloader (2)"
 _unifont_ver='15.1.04'
-_tag='e58b870ff926415e23fc386af41ff81b2f588763' # git rev-parse grub-${_pkgver}
-_pkgver=2.12rc1.r49.ge58b870ff
-pkgver=${_pkgver/-/}
-pkgrel=2
+_tag='7c8ae7dcbd59a963130a7aaae7a7348334465f74' # master
+pkgver=2.12rc1.r106.g7c8ae7dcb
+pkgrel=1
 arch=('x86_64' 'aarch64')
 url='https://www.gnu.org/software/grub/'
 license=('GPL3')
@@ -79,7 +78,6 @@ source=("git+https://git.savannah.gnu.org/git/grub.git#tag=${_tag}" #?signed"
         '0001-grub-maybe_quiet.patch'
         '0002-grub-gettext_quiet.patch'
         '0003-grub-quick-boot.patch'
-        'xfs-parsing.patch'
         'background.png'
         'grub.cfg'
         'update-grub'
@@ -102,7 +100,6 @@ sha256sums=('SKIP'
             'a522514edb264374c8cce08998c5586ffc832091c5db1be7bf8b21078223e2a6'
             '39d7843dfe1e10ead912a81be370813b8621794a7967b3cc5e4d4188b5bf7264'
             '4cae03685c238a60169f1134165ff010faebddb5b3218d92d32e0b6729b27656'
-            'ca35edec447ac0277c78f862f88eebb8cef45b33ffe6021f2c142dd7ab3749be'
             '01264c247283b7bbdef65d7646541c022440ddaf54f8eaf5aeb3a02eb98b4dd8'
             '7fc95d49c0febe98a76e56b606a280565cb736580adecf163bc6b5aca8e7cbd8'
             'c9027a993fe19a023bc6560aaee21487d97388d7997ba02db5c947bd0a5bdc12'
@@ -140,6 +137,11 @@ _configure_options=(
 	--disable-silent-rules
 	--disable-werror
 )
+
+pkgver() {
+    cd grub
+    git describe --long --tags | sed 's/^grub.//;s/\([^-]*-g\)/r\1/;s/-/./g;s/.rc/rc/'
+}
 
 prepare() {
 	cd "${srcdir}/grub/"
@@ -190,9 +192,6 @@ prepare() {
 	patch -Np1 -i "${srcdir}/0002-grub-gettext_quiet.patch"
 	echo "0003"
 	patch -Np1 -i "${srcdir}/0003-grub-quick-boot.patch"
-	
-	echo "Fix XFS directory entry parsing"
-	patch -Np1 -i "${srcdir}/xfs-parsing.patch"
 
 	echo "Fix DejaVuSans.ttf location so that grub-mkfont can create *.pf2 files for starfield theme..."
 	sed 's|/usr/share/fonts/dejavu|/usr/share/fonts/dejavu /usr/share/fonts/TTF|g' -i "configure.ac"

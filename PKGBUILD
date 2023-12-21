@@ -27,8 +27,8 @@ pkgbase=grub
 pkgname=('grub' 'grub-update')
 pkgdesc="GNU GRand Unified Bootloader (2)"
 _unifont_ver='15.1.04'
-_tag='7c8ae7dcbd59a963130a7aaae7a7348334465f74' # master
-pkgver=2.12rc1.r106.g7c8ae7dcb
+_tag='5ca9db22e8ed0dbebb2aec53722972de0680a463' # master
+pkgver=2.12
 pkgrel=1
 arch=('x86_64' 'aarch64')
 url='https://www.gnu.org/software/grub/'
@@ -138,10 +138,10 @@ _configure_options=(
 	--disable-werror
 )
 
-pkgver() {
-    cd grub
-    git describe --long --tags | sed 's/^grub.//;s/\([^-]*-g\)/r\1/;s/-/./g;s/.rc/rc/'
-}
+#pkgver() {
+#    cd grub
+#    git describe --long --tags | sed 's/^grub.//;s/\([^-]*-g\)/r\1/;s/-/./g;s/.rc/rc/'
+#}
 
 prepare() {
 	cd "${srcdir}/grub/"

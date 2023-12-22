@@ -24,12 +24,12 @@ _GRUB_EMU_BUILD="1"
 [[ "${CARCH}" == 'aarch64' ]] && _EMU_ARCH='aarch64'
 
 pkgbase=grub
-pkgname=('grub' 'grub-update')
+pkgname=('grub' 'update-grub')
 pkgdesc="GNU GRand Unified Bootloader (2)"
 _unifont_ver='15.1.04'
 _tag='5ca9db22e8ed0dbebb2aec53722972de0680a463' # master
 pkgver=2.12
-pkgrel=1
+pkgrel=2
 arch=('x86_64' 'aarch64')
 url='https://www.gnu.org/software/grub/'
 license=('GPL3')
@@ -51,7 +51,8 @@ optdepends=('freetype2: For grub-mkfont usage'
             'efibootmgr: For grub-install EFI support'
             'libisoburn: Provides xorriso for generating grub rescue iso using grub-mkrescue'
             'os-prober: To detect other OSes when generating grub.cfg in BIOS systems'
-            'mtools: For grub-mkrescue FAT FS support')
+            'mtools: For grub-mkrescue FAT FS support'
+            'update-grub: Script to update Grub Menu on Linux Kernel updates')
 
 if [[ "${_GRUB_EMU_BUILD}" == "1" ]]; then
     makedepends+=('libusb' 'sdl')
@@ -82,7 +83,7 @@ source=("git+https://git.savannah.gnu.org/git/grub.git#tag=${_tag}" #?signed"
         'grub.cfg'
         'update-grub'
         'grub-set-bootflag'
-        "${pkgname}.hook")
+        "update-grub.hook")
 
 sha256sums=('SKIP'
             'SKIP'
@@ -346,9 +347,6 @@ _package_grub-common_and_bios() {
 	echo "Install /etc/default/grub (used by grub-mkconfig)"
 	install -D -m0644 "$srcdir"/grub.default "$pkgdir"/etc/default/grub
 
-	echo "Install 99-${pkgname}.hook"
-	install -D -m644 "${srcdir}/${pkgname}.hook" "${pkgdir}/usr/share/libalpm/hooks/99-${pkgname}.hook"
-
 	# workaround for quiet fsck
 	install -D -m755 "${srcdir}/grub-set-bootflag" "${pkgdir}/usr/bin/grub-set-bootflag"
 }
@@ -380,7 +378,6 @@ _package_grub-emu() {
 }
 
 package_grub() {
-	depends+=('grub-update')
 	cd "${srcdir}/grub/"
 
 	echo "Package grub ${_EFI_ARCH} efi stuff..."
@@ -403,14 +400,16 @@ package_grub() {
 	rm "$pkgdir/usr/share/info/dir"
 }
 
-package_grub-update() {
+package_update-grub() {
 	pkgdesc="GNU Grub (2) Update Menu Script"
 	depends=(grub)
 	optdepends=()
 	provides=()
-	conflicts=()
-	replaces=()
+	conflicts=('grub-update')
+	replaces=('grub-update')
 	backup=()
 	echo "Install update-grub"
 	install -Dm755 "${srcdir}/update-grub" "${pkgdir}/usr/bin/update-grub"
+	echo "Install 99-update-grub.hook"
+	install -D -m644 "${srcdir}/update-grub.hook" "${pkgdir}/usr/share/libalpm/hooks/99-update-grub.hook"
 }

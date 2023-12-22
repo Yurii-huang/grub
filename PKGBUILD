@@ -27,12 +27,14 @@ pkgbase=grub
 pkgname=('grub' 'update-grub')
 pkgdesc="GNU GRand Unified Bootloader (2)"
 _unifont_ver='15.1.04'
-_tag='5ca9db22e8ed0dbebb2aec53722972de0680a463' # master
-pkgver=2.12
-pkgrel=2
+_tag='03e6ea18f6f834f177cad017279bedbb0a3de594' # git rev-parse grub-${_pkgver}
+_pkgver=2.12
+_unifont_ver='15.1.04'
+pkgver=${_pkgver/-/}
+pkgrel=3
 arch=('x86_64' 'aarch64')
 url='https://www.gnu.org/software/grub/'
-license=('GPL3')
+license=('GPL-3.0-or-later')
 backup=('etc/default/grub'
         'etc/grub.d/40_custom'
         'boot/grub/grub.cfg')
@@ -395,9 +397,6 @@ package_grub() {
 
 	echo "Package grub bios stuff..."
 	_package_grub-common_and_bios
-
-	# Don't overwrite /usr/share/info/dir
-	rm "$pkgdir/usr/share/info/dir"
 }
 
 package_update-grub() {

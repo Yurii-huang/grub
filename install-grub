@@ -16,71 +16,12 @@ config_item()
   fi
 }
 
-# This only works on a Linux system with udev running.  This is probably the
-# vast majority of systems where we need any of this, though, and we fall
-# back reasonably gracefully if we don't have it.
-cached_available_ids=
-available_ids()
-{
-  local id path
-
-  if [ "$cached_available_ids" ]; then
-    echo "$cached_available_ids"
-    return
-  fi
-
-  [ -d /dev/disk/by-id ] || return
-  cached_available_ids="$(
-    for path in /dev/disk/by-id/*; do
-      [ -e "$path" ] || continue
-      printf '%s %s\n' "$path" "$(readlink -f "$path")"
-    done | sort -k2 -s -u | cut -d' ' -f1
-  )"
-  echo "$cached_available_ids"
-}
-
-# Returns non-zero and no output if no mapping can be found.
-device_to_id()
-{
-  local id
-  for id in $(available_ids); do
-    if [ "$(readlink -f "$id")" = "$(readlink -f "$1")" ]; then
-      echo "$id"
-      return 0
-    fi
-  done
-  # Fall back to the plain device name if there's no by-id link for it.
-  if [ -e "$1" ]; then
-    echo "$1"
-    return 0
-  fi
-  return 1
-}
-
-usable_partitions()
-{
-  local last_partition path partition partition_id
-
-  last_partition=
-  for path in / /boot /boot/grub; do
-    partition="$(grub-probe -t device "$path" || true)"
-    if [ -z "$partition" ] || [ "$partition" = "$last_partition" ]; then
-      continue
-    fi
-    partition_id="$(device_to_id "$partition" || true)"
-    echo "$path:$partition_id"
-    last_partition="$partition"
-  done | sort -t: -k2
-}
-
 if [[ $EUID -ne 0 ]]; then
     echo "$0: You must run this as root"
     exit 2
 fi
 
-partitions="$(usable_partitions)"
 bootloader_id="$(config_item GRUB_DISTRIBUTOR | tr A-Z a-z | cut -d' ' -f1)"
-disk_partition="$(grub-probe -t device /boot/grub || true)"
 disk_name="$(grub-probe -t disk /boot/grub || true)"
 grub_type=""
 efi_target=""
@@ -113,9 +54,11 @@ elif [ -e "/boot/grub/i386-pc/core.img" ]; then
     grub_type="MBR"
 fi
 
-efi_directory="$(find /boot -name $efi_grub_file | awk -F '/EFI' '{print $1}')"
-efi_source_file="$(find /boot -name $efi_grub_file)"
-efi_target_file="$(find /boot -name $efi_boot_file)"
+if [[ $grub_type == "EFI" ]]; then
+    efi_directory="$(find /boot -name $efi_grub_file | awk -F '/EFI' '{print $1}')"
+    efi_source_file="$(find /boot -name $efi_grub_file)"
+    efi_target_file="$(find /boot -name $efi_boot_file)"
+fi
 
 if [[ $grub_type == "EFI" ]] && [[ -e "/boot/grub/$efi_target/core.efi" ]]; then
     _grub_install="grub-install --target=$efi_target --efi-directory=$efi_directory \

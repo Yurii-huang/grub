@@ -21,12 +21,14 @@ if [[ $EUID -ne 0 ]]; then
     exit 2
 fi
 
-bootloader_id="$(config_item GRUB_DISTRIBUTOR | tr A-Z a-z | cut -d' ' -f1)"
+bootloader_id="$(config_item GRUB_DISTRIBUTOR | cut -d' ' -f1)"
 disk_name="$(grub-probe -t disk /boot/grub || true)"
 grub_type=""
 efi_target=""
 efi_grub_file=""
 efi_boot_file=""
+fallback_is_same=false
+did_update=false
 
 if [ -e "/boot/grub/i386-efi/core.efi" ]; then
     # Assume all 32-bitters are legacy x86
@@ -58,8 +60,10 @@ if [[ $grub_type == "EFI" ]]; then
     for path in /boot /efi; do
         if [[ -e $path ]]; then
             efi_directory="$(find $path -name $efi_grub_file | awk -F '/EFI' '{print $1}')"
-            efi_source_file="$(find $path -name $efi_grub_file)"
+            efi_source_file="$(find $efi_directory/EFI/$bootloader_id -name $efi_grub_file)"
             efi_target_file="$(find $path -name $efi_boot_file)"
+            cmp -s $efi_source_file $efi_target_file && fallback_is_same=true
+            [[ ! -z $efi_directory ]] && break
         fi
     done
     if [[ -z $efi_directory ]]; then
@@ -70,10 +74,10 @@ fi
 
 if [[ $grub_type == "EFI" ]] && [[ -e "/boot/grub/$efi_target/core.efi" ]]; then
     _grub_install="grub-install --target=$efi_target --efi-directory=$efi_directory \
---bootloader-id=$bootloader_id --recheck --force"
+--bootloader-id=$bootloader_id --recheck --force" && did_update=true
 elif [[ $grub_type == "MBR" ]]; then
     _grub_install="grub-install --target=i386-pc --boot-directory=/boot \
---recheck --force $disk_name"
+--recheck --force $disk_name" && did_update=true
 fi
 
 echo "Grub will be installed on: $grub_type"
@@ -81,8 +85,9 @@ if ! $_grub_install ; then
     echo "Failed: $_grub_install" >&2
     echo "WARNING: Bootloader is not properly installed, system may not be bootable" >&2
     exit 1
-elif [[ $grub_type == "EFI" ]] && [[ -e "$efi_target_file" ]]; then
-    echo "Update UEFI Fallback file: $efi_target_file"
+elif [[ $grub_type == "EFI" ]] && [[ -e "$efi_target_file" ]] \
+     && [[ "$fallback_is_same" == "true" ]] && [[ "$did_update" == "true" ]]; then
+    echo "Update UEFI Fallback file to: $efi_source_file"
     cp $efi_source_file $efi_target_file
 fi
 

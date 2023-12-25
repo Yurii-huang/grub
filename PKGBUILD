@@ -24,7 +24,7 @@ _GRUB_EMU_BUILD="1"
 [[ "${CARCH}" == 'aarch64' ]] && _EMU_ARCH='aarch64'
 
 pkgbase=grub
-pkgname=('grub' 'update-grub')
+pkgname=('grub' 'update-grub' 'install-grub')
 pkgdesc="GNU GRand Unified Bootloader (2)"
 _unifont_ver='15.1.04'
 _tag='03e6ea18f6f834f177cad017279bedbb0a3de594' # git rev-parse grub-${_pkgver}
@@ -38,7 +38,6 @@ license=('GPL-3.0-or-later')
 backup=('etc/default/grub'
         'etc/grub.d/40_custom'
         'boot/grub/grub.cfg')
-install="${pkgname}.install"
 options=('!makeflags')
 provides=('grub-common' 'grub-bios' 'grub-emu' "grub-efi-${_EFI_ARCH}")
 conflicts=('grub-common' 'grub-bios' 'grub-emu' "grub-efi-${_EFI_ARCH}" 'grub-legacy')
@@ -54,7 +53,8 @@ optdepends=('freetype2: For grub-mkfont usage'
             'libisoburn: Provides xorriso for generating grub rescue iso using grub-mkrescue'
             'os-prober: To detect other OSes when generating grub.cfg in BIOS systems'
             'mtools: For grub-mkrescue FAT FS support'
-            'update-grub: Script to update Grub Menu on Linux Kernel updates')
+            'update-grub: Script to update Grub Menu on Linux Kernel updates'
+            'install-grub: Script to install Grub after package updates')
 
 if [[ "${_GRUB_EMU_BUILD}" == "1" ]]; then
     makedepends+=('libusb' 'sdl')
@@ -84,8 +84,10 @@ source=("git+https://git.savannah.gnu.org/git/grub.git#tag=${_tag}" #?signed"
         'background.png'
         'grub.cfg'
         'update-grub'
+        'install-grub'
         'grub-set-bootflag'
-        "update-grub.hook")
+        'update-grub.hook'
+        'install-grub.hook')
 
 sha256sums=('SKIP'
             'SKIP'
@@ -106,8 +108,10 @@ sha256sums=('SKIP'
             '01264c247283b7bbdef65d7646541c022440ddaf54f8eaf5aeb3a02eb98b4dd8'
             '7fc95d49c0febe98a76e56b606a280565cb736580adecf163bc6b5aca8e7cbd8'
             'c9027a993fe19a023bc6560aaee21487d97388d7997ba02db5c947bd0a5bdc12'
+            'b581bf29bd98d14f50479b3bed00d9ba62d79d02e226752978ef5f2a5970743d'
             '2eb199f510340cf8d190ba2fa80d5bdcf1e2e7ca53e8011af2ee62ea3b8dd03b'
-            'a97ddf6694fa5070463a2d3f997205436a63fbe125071dd1bef0d59999adff70')
+            'a97ddf6694fa5070463a2d3f997205436a63fbe125071dd1bef0d59999adff70'
+            '34f182499792f888e657b624f02837fab8762ca74e1a56884af8bf4fe2c33680')
             
 _backports=(
 )
@@ -380,6 +384,7 @@ _package_grub-emu() {
 }
 
 package_grub() {
+	install="${pkgname}.install"
 	cd "${srcdir}/grub/"
 
 	echo "Package grub ${_EFI_ARCH} efi stuff..."
@@ -411,4 +416,18 @@ package_update-grub() {
 	install -Dm755 "${srcdir}/update-grub" "${pkgdir}/usr/bin/update-grub"
 	echo "Install 99-update-grub.hook"
 	install -D -m644 "${srcdir}/update-grub.hook" "${pkgdir}/usr/share/libalpm/hooks/99-update-grub.hook"
+}
+
+package_install-grub() {
+	pkgdesc="GNU Grub (2) Install Script on Updates"
+	depends=(grub)
+	optdepends=()
+	provides=()
+	conflicts=()
+	replaces=()
+	backup=()
+	echo "Install install-grub"
+	install -Dm755 "${srcdir}/install-grub" "${pkgdir}/usr/bin/install-grub"
+	echo "Install 98-install-grub.hook"
+	install -D -m644 "${srcdir}/install-grub.hook" "${pkgdir}/usr/share/libalpm/hooks/98-install-grub.hook"
 }

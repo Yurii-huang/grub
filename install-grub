@@ -1,0 +1,142 @@
+#!/bin/bash
+
+config_item()
+{
+  for x in /etc/default/grub /etc/default/grub.d/*.cfg; do
+    if [ -e "$x" ]; then
+	# Lose any output here so we don't confuse our
+	# caller. The xen packages echo stuff here, Aargh!
+      . "$x" > /dev/null
+    fi
+  done
+  if [ "$(eval echo "\${$1+set}")" = set ]; then
+    eval echo "\$$1"
+  else
+    return
+  fi
+}
+
+# This only works on a Linux system with udev running.  This is probably the
+# vast majority of systems where we need any of this, though, and we fall
+# back reasonably gracefully if we don't have it.
+cached_available_ids=
+available_ids()
+{
+  local id path
+
+  if [ "$cached_available_ids" ]; then
+    echo "$cached_available_ids"
+    return
+  fi
+
+  [ -d /dev/disk/by-id ] || return
+  cached_available_ids="$(
+    for path in /dev/disk/by-id/*; do
+      [ -e "$path" ] || continue
+      printf '%s %s\n' "$path" "$(readlink -f "$path")"
+    done | sort -k2 -s -u | cut -d' ' -f1
+  )"
+  echo "$cached_available_ids"
+}
+
+# Returns non-zero and no output if no mapping can be found.
+device_to_id()
+{
+  local id
+  for id in $(available_ids); do
+    if [ "$(readlink -f "$id")" = "$(readlink -f "$1")" ]; then
+      echo "$id"
+      return 0
+    fi
+  done
+  # Fall back to the plain device name if there's no by-id link for it.
+  if [ -e "$1" ]; then
+    echo "$1"
+    return 0
+  fi
+  return 1
+}
+
+usable_partitions()
+{
+  local last_partition path partition partition_id
+
+  last_partition=
+  for path in / /boot /boot/grub; do
+    partition="$(grub-probe -t device "$path" || true)"
+    if [ -z "$partition" ] || [ "$partition" = "$last_partition" ]; then
+      continue
+    fi
+    partition_id="$(device_to_id "$partition" || true)"
+    echo "$path:$partition_id"
+    last_partition="$partition"
+  done | sort -t: -k2
+}
+
+if [[ $EUID -ne 0 ]]; then
+    echo "$0: You must run this as root"
+    exit 2
+fi
+
+partitions="$(usable_partitions)"
+bootloader_id="$(config_item GRUB_DISTRIBUTOR | tr A-Z a-z | cut -d' ' -f1)"
+disk_partition="$(grub-probe -t device /boot/grub || true)"
+disk_name="$(grub-probe -t disk /boot/grub || true)"
+grub_type=""
+efi_target=""
+efi_grub_file=""
+efi_boot_file=""
+
+if [ -e "/boot/grub/i386-efi/core.efi" ]; then
+    # Assume all 32-bitters are legacy x86
+    grub_type="EFI"
+    efi_target="i386-efi"
+    efi_grub_file="grubia32.efi"
+    efi_boot_file="bootia32.efi"
+elif [ -e "/boot/grub/arm64-efi/core.efi" ]; then
+    grub_type="EFI"
+    efi_target="arm64-efi"
+    efi_grub_file="grubaa64.efi"
+    efi_boot_file="bootaa64.efi"
+elif [ -e "/boot/grub/loongarch64-efi/core.efi" ]; then
+    grub_type="EFI"
+    efi_target="loongarch64-efi"
+    efi_grub_file="grubloongarch64.efi"
+    efi_boot_file="bootloongarch64.efi"
+elif [ -e "/boot/grub/x86_64-efi/core.efi" ]; then
+    # If it's not ARM, must be AMD64
+    grub_type="EFI"
+    efi_target="x86_64-efi"
+    efi_grub_file="grubx64.efi"
+    efi_boot_file="bootx64.efi"
+elif [ -e "/boot/grub/i386-pc/core.img" ]; then
+    grub_type="MBR"
+fi
+
+efi_directory="$(find /boot -name $efi_grub_file | awk -F '/EFI' '{print $1}')"
+efi_source_file="$(find /boot -name $efi_grub_file)"
+efi_target_file="$(find /boot -name $efi_boot_file)"
+
+if [[ $grub_type == "EFI" ]] && [[ -e "/boot/grub/$efi_target/core.efi" ]]; then
+    _grub_install="grub-install --target=$efi_target --efi-directory=$efi_directory \
+--bootloader-id=$bootloader_id --recheck --force"
+elif [[ $grub_type == "MBR" ]]; then
+    _grub_install="grub-install --target=i386-pc --boot-directory=/boot \
+--recheck --force $disk_name"
+fi
+
+echo "Grub will be installed on: $grub_type"
+if ! $_grub_install ; then
+    echo "Failed: $_grub_install" >&2
+    echo "WARNING: Bootloader is not properly installed, system may not be bootable" >&2
+    exit 1
+elif [[ $grub_type == "EFI" ]] && [[ -e "$efi_target_file" ]]; then
+    echo "Copying UEFI Fallback file: $efi_target_file"
+    cp $efi_source_file $efi_target_file
+fi
+
+grub-mkconfig -o /boot/grub/grub.cfg "$@"
+
+# workaround for https://git.savannah.gnu.org/cgit/grub.git/commit/?id=3cf2e848bc03c44d30bb87e583d12efe7e7ccf75
+# if grub is not updated in MBR/EFI dashes still won't work, hence we remove them
+sed -i -e '/cryptomount -u/ {s/-//g;s/ u/ -u/g}' /boot/grub/grub.cfg

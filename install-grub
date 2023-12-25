@@ -55,9 +55,17 @@ elif [ -e "/boot/grub/i386-pc/core.img" ]; then
 fi
 
 if [[ $grub_type == "EFI" ]]; then
-    efi_directory="$(find /boot -name $efi_grub_file | awk -F '/EFI' '{print $1}')"
-    efi_source_file="$(find /boot -name $efi_grub_file)"
-    efi_target_file="$(find /boot -name $efi_boot_file)"
+    for path in /boot /efi; do
+        if [[ -e $path ]]; then
+            efi_directory="$(find $path -name $efi_grub_file | awk -F '/EFI' '{print $1}')"
+            efi_source_file="$(find $path -name $efi_grub_file)"
+            efi_target_file="$(find $path -name $efi_boot_file)"
+        fi
+    done
+    if [[ -z $efi_directory ]]; then
+        echo "WARNING: EFI directory not found! Grub couldn't be installed." >&2
+        exit 1
+    fi
 fi
 
 if [[ $grub_type == "EFI" ]] && [[ -e "/boot/grub/$efi_target/core.efi" ]]; then
@@ -74,7 +82,7 @@ if ! $_grub_install ; then
     echo "WARNING: Bootloader is not properly installed, system may not be bootable" >&2
     exit 1
 elif [[ $grub_type == "EFI" ]] && [[ -e "$efi_target_file" ]]; then
-    echo "Copying UEFI Fallback file: $efi_target_file"
+    echo "Update UEFI Fallback file: $efi_target_file"
     cp $efi_source_file $efi_target_file
 fi
 

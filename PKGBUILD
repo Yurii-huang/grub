@@ -25,6 +25,7 @@ _GRUB_EMU_BUILD="1"
 
 pkgbase=grub
 pkgname=('grub' 'update-grub' 'install-grub')
+#pkgname=('install-grub')
 pkgdesc="GNU GRand Unified Bootloader (2)"
 _unifont_ver='15.1.04'
 _tag='03e6ea18f6f834f177cad017279bedbb0a3de594' # git rev-parse grub-${_pkgver}
@@ -108,7 +109,7 @@ sha256sums=('SKIP'
             '01264c247283b7bbdef65d7646541c022440ddaf54f8eaf5aeb3a02eb98b4dd8'
             '7fc95d49c0febe98a76e56b606a280565cb736580adecf163bc6b5aca8e7cbd8'
             'c9027a993fe19a023bc6560aaee21487d97388d7997ba02db5c947bd0a5bdc12'
-            'db91c0333af71d52cdc14f150a97676e362573be0392fc5bf6329f2727deccf5'
+            '2b1ab5ef4a2db2214820c4c6bbbee347d5d5a40fe6dee9203038ec1bb6aa6d57'
             '2eb199f510340cf8d190ba2fa80d5bdcf1e2e7ca53e8011af2ee62ea3b8dd03b'
             'a97ddf6694fa5070463a2d3f997205436a63fbe125071dd1bef0d59999adff70'
             '34f182499792f888e657b624f02837fab8762ca74e1a56884af8bf4fe2c33680')

@@ -32,7 +32,7 @@ _tag='03e6ea18f6f834f177cad017279bedbb0a3de594' # git rev-parse grub-${_pkgver}
 _pkgver=2.12
 _unifont_ver='15.1.04'
 pkgver=${_pkgver/-/}
-pkgrel=3.4
+pkgrel=3.5
 arch=('x86_64' 'aarch64')
 url='https://www.gnu.org/software/grub/'
 license=('GPL-3.0-or-later')
@@ -109,7 +109,7 @@ sha256sums=('SKIP'
             '01264c247283b7bbdef65d7646541c022440ddaf54f8eaf5aeb3a02eb98b4dd8'
             '7fc95d49c0febe98a76e56b606a280565cb736580adecf163bc6b5aca8e7cbd8'
             'c9027a993fe19a023bc6560aaee21487d97388d7997ba02db5c947bd0a5bdc12'
-            'ed0e17c0e4cd8b1582679571c7f3855d27d0b85553e4e3be271f7fe7d020ab45'
+            '6bfa88553607c41c2b400bf2c904f6051b1905efc4d8c0f8b40024a0eda705a9'
             '2eb199f510340cf8d190ba2fa80d5bdcf1e2e7ca53e8011af2ee62ea3b8dd03b'
             'a97ddf6694fa5070463a2d3f997205436a63fbe125071dd1bef0d59999adff70'
             '34f182499792f888e657b624f02837fab8762ca74e1a56884af8bf4fe2c33680')

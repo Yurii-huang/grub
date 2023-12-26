@@ -55,7 +55,7 @@ efi_target=""
 efi_grub_file=""
 efi_boot_file=""
 fallback_is_same=false
-did_update=false
+failed_update=false
 _grub_install=""
 
 if [[ -e "/boot/grub/i386-efi/core.efi" ]]; then
@@ -85,33 +85,34 @@ fi
 if [[ $grub_type == "EFI" ]]; then
     for path in /boot /efi; do
         if [[ -e $path ]]; then
-            efi_directory="$(find $path -name $efi_grub_file | awk -F '/EFI' '{print $1}')"
-            if [[ ! -z $efi_directory ]]; then
-                efi_source_file="$(find $efi_directory/EFI/$bootloader_id -name $efi_grub_file)"
+            efi_directory="$(find $path -name $efi_grub_file | \
+            grep "$bootloader_id" | awk -F '/EFI' '{print $1}')"
+            if [[ ! -z "$efi_directory" ]]; then
+                efi_source_file="$efi_directory/EFI/$bootloader_id/$efi_grub_file"
                 efi_target_file="$(find $path -name $efi_boot_file)"
-                if [[ ! -z $efi_source_file ]] && [[ ! -z $efi_target_file ]]; then 
-                    cmp -s $efi_source_file $efi_target_file && fallback_is_same=true
+                if [[ -e "$efi_source_file" ]] && [[ -e "$efi_target_file" ]]; then
+                    cmp -s "$efi_source_file" "$efi_target_file" && fallback_is_same=true
                 fi
                 break
             fi
         fi
     done
-    if [[ -z $efi_directory ]]; then
+    if [[ -z "$efi_directory" ]]; then
         echo "WARNING: EFI directory not found! Grub couldn't be installed." >&2
         exit 1
     fi
 fi
 
-if [[ $grub_type == "EFI" ]] && [[ -e "/boot/grub/$efi_target/core.efi" ]] \
+if [[ "$grub_type" == "EFI" ]] && [[ -e "/boot/grub/$efi_target/core.efi" ]] \
     && [[ -e "$efi_source_file" ]]; then
     _grub_install="grub-install --no-nvram --target=$efi_target --efi-directory=$efi_directory \
---bootloader-id=$bootloader_id --recheck --force" && did_update=true
-elif [[ $grub_type == "MBR" ]] && $(scan_grub2 "$disk_name"); then
+--bootloader-id=$bootloader_id --recheck --force"
+elif [[ "$grub_type" == "MBR" ]] && $(scan_grub2 "$disk_name"); then
     _grub_install="grub-install --target=i386-pc --boot-directory=/boot \
---recheck --force $disk_name" && did_update=true
+--recheck --force $disk_name"
 fi
 
-if [[ -z $_grub_install ]]; then
+if [[ -z "$_grub_install" ]]; then
     echo "WARNING: Grub is not properly installed, system may not be bootable or other bootloader is used" >&2
     exit 1
 fi
@@ -120,14 +121,15 @@ echo "Grub will be installed on: $grub_type"
 if ! $_grub_install ; then
     echo "Failed: $_grub_install" >&2
     echo "WARNING: Bootloader is not properly installed, system may not be bootable" >&2
+    failed_update=true
     exit 1
-elif [[ $grub_type == "EFI" ]] && [[ -e "$efi_source_file" ]] && [[ -e "$efi_target_file" ]] \
-     && [[ "$fallback_is_same" == "true" ]] && [[ "$did_update" == "true" ]]; then
-    echo "Update UEFI Fallback file to: $efi_source_file"
-    cp $efi_source_file $efi_target_file
+elif [[ "$grub_type" == "EFI" ]] && [[ -e "$efi_source_file" ]] && [[ -e "$efi_target_file" ]] \
+     && [[ "$fallback_is_same" == "true" ]] && [[ "$failed_update" == "false" ]]; then
+    echo "Update UEFI Fallback file: $efi_source_file"
+    cp "$efi_source_file" "$efi_target_file"
 fi
 
-if [[ $grub_type == "MBR" ]] && [[ -e /etc/grub.d/30_uefi-firmware ]]; then
+if [[ "$grub_type" == "MBR" ]] && [[ -e /etc/grub.d/30_uefi-firmware ]]; then
     rm /etc/grub.d/30_uefi-firmware
 fi
 

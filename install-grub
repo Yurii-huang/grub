@@ -49,7 +49,6 @@ scan_grub2()
 }
 
 bootloader_id="$(config_item GRUB_DISTRIBUTOR | cut -d' ' -f1)"
-disk_name="$(grub-probe -t disk /boot/grub || true)"
 grub_type=""
 efi_target=""
 efi_grub_file=""
@@ -80,6 +79,7 @@ elif [[ -e "/boot/grub/x86_64-efi/core.efi" ]]; then
     efi_boot_file="bootx64.efi"
 elif [[ -e "/boot/grub/i386-pc/core.img" ]]; then
     grub_type="MBR"
+    disk_name="$(grub-probe -t disk /boot/grub || true)"
 fi
 
 if [[ $grub_type == "EFI" ]]; then

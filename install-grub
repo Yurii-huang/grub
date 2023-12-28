@@ -128,13 +128,14 @@ elif [[ -e "/boot/grub/i386-pc/core.img" ]]; then
 fi
 
 if [[ $grub_type == "EFI" ]]; then
+    current_boot_entry="$(efibootmgr | awk 'match($0,/^BootCurrent: ([0-9a-fA-F]{4})$/,out) { current=out[1] } match($0,/^Boot([0-9a-fA-F]{4})\*? ([^:]+)\t/,out) { if (out[1]==current) print out[2] }')"
     for path in $(lsblk -rno parttypename,mountpoint | \
     awk -e '/EFI\\x20\(FAT-12\/16\/32\)|EFI\\x20System/ {print $2}' | tr -s '\n'); do
         if [[ -e $path ]]; then
             efi_directory="$path"
             $debug && echo "[D] Checking EFI-Directory: $efi_directory"
             if [[ ! -z "$efi_directory" ]]; then
-                efi_source_file="$efi_directory/EFI/$bootloader_id/$efi_grub_file"
+                efi_source_file="$(find $path -iwholename "*$bootloader_id/$efi_grub_file")"
                 $debug && [[ -e "$efi_source_file" ]] && echo "[D] Found EFI Bootloader: $efi_source_file"
                 efi_target_file="$(find $path -name $efi_boot_file)"
                 $debug && [[ -e "$efi_target_file" ]] && echo "[D] Found EFI Fallback: $efi_target_file"
@@ -178,7 +179,9 @@ if ! $_grub_install ; then
     echo "WARNING: Bootloader is not properly installed, system may not be bootable" >&2
     failed_update=true
     exit 1
-elif [[ "$grub_type" == "EFI" ]] && [[ -e "$efi_source_file" ]] && [[ -e "$efi_target_file" ]] \
+fi
+
+if [[ "$grub_type" == "EFI" ]] && [[ -e "$efi_source_file" ]] && [[ -e "$efi_target_file" ]] \
      && [[ "$fallback_is_same" == "true" ]] && [[ "$failed_update" == "false" ]]; then
     echo "Update UEFI Fallback file: $efi_source_file"
     $interactive && yes_no
@@ -192,6 +195,15 @@ if [[ "$grub_type" == "MBR" ]] && [[ -e /etc/grub.d/30_uefi-firmware ]]; then
 fi
 
 # Update Grub Menu
-$interactive && echo "Updating Grub Menu"
-$interactive && yes_no
-grub-mkconfig -o /boot/grub/grub.cfg
+if [[ "$failed_update" == "false" ]]; then
+    $interactive && echo "Update Grub Menu"
+    $interactive && yes_no
+    grub-mkconfig -o /boot/grub/grub.cfg
+fi
+
+if [[ "$grub_type" == "EFI" ]] && [[ "${current_boot_entry,,}" != "${bootloader_id,,}" ]] \
+    && [[ "$failed_update" == "false" ]]; then
+    echo "Warning: GRUB bootloader at $efi_directory/EFI/$bootloader_id was updated,
+but it seems like you are not using it by default.
+Please check your EFI boot priorities!"
+fi

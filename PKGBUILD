@@ -32,7 +32,7 @@ _tag='03e6ea18f6f834f177cad017279bedbb0a3de594' # git rev-parse grub-${_pkgver}
 _pkgver=2.12
 _unifont_ver='15.1.04'
 pkgver=${_pkgver/-/}
-pkgrel=3.6
+pkgrel=3.7
 arch=('x86_64' 'aarch64')
 url='https://www.gnu.org/software/grub/'
 license=('GPL-3.0-or-later')
@@ -86,6 +86,7 @@ source=("git+https://git.savannah.gnu.org/git/grub.git#tag=${_tag}" #?signed"
         'grub.cfg'
         'update-grub'
         'install-grub'
+        'install-grub.conf'
         'grub-set-bootflag'
         'update-grub.hook'
         'install-grub.hook')
@@ -109,7 +110,8 @@ sha256sums=('SKIP'
             '01264c247283b7bbdef65d7646541c022440ddaf54f8eaf5aeb3a02eb98b4dd8'
             '7fc95d49c0febe98a76e56b606a280565cb736580adecf163bc6b5aca8e7cbd8'
             'c9027a993fe19a023bc6560aaee21487d97388d7997ba02db5c947bd0a5bdc12'
-            '1c8d53e0dc90ab220af01d9cdf755445664232eed98cda3b9545894911f945f7'
+            '50e25dfc54719ea3f9eb2c53a3948d7adf807a12bc50a7dd64546577650a8997'
+            '26c0482fb80651519cc49af0c646e3a5ab612b61b9bdc08c2a4558d452b31435'
             '2eb199f510340cf8d190ba2fa80d5bdcf1e2e7ca53e8011af2ee62ea3b8dd03b'
             'a97ddf6694fa5070463a2d3f997205436a63fbe125071dd1bef0d59999adff70'
             '34f182499792f888e657b624f02837fab8762ca74e1a56884af8bf4fe2c33680')
@@ -426,9 +428,11 @@ package_install-grub() {
 	provides=()
 	conflicts=()
 	replaces=()
-	backup=()
+	backup=('etc/install-grub.conf')
 	echo "Install install-grub"
 	install -Dm755 "${srcdir}/install-grub" "${pkgdir}/usr/bin/install-grub"
+	echo "Install install-grub.conf"
+	install -Dm644 "${srcdir}/install-grub.conf" "${pkgdir}/etc/install-grub.conf"
 	echo "Install 98-install-grub.hook"
-	install -D -m644 "${srcdir}/install-grub.hook" "${pkgdir}/usr/share/libalpm/hooks/98-install-grub.hook"
+	install -Dm644 "${srcdir}/install-grub.hook" "${pkgdir}/usr/share/libalpm/hooks/98-install-grub.hook"
 }

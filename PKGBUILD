@@ -32,7 +32,7 @@ _tag='03e6ea18f6f834f177cad017279bedbb0a3de594' # git rev-parse grub-${_pkgver}
 _pkgver=2.12
 _unifont_ver='15.1.04'
 pkgver=${_pkgver/-/}
-pkgrel=3.8
+pkgrel=3.10
 arch=('x86_64' 'aarch64')
 url='https://www.gnu.org/software/grub/'
 license=('GPL-3.0-or-later')
@@ -110,7 +110,7 @@ sha256sums=('SKIP'
             '01264c247283b7bbdef65d7646541c022440ddaf54f8eaf5aeb3a02eb98b4dd8'
             '7fc95d49c0febe98a76e56b606a280565cb736580adecf163bc6b5aca8e7cbd8'
             'c9027a993fe19a023bc6560aaee21487d97388d7997ba02db5c947bd0a5bdc12'
-            '3b23cd8a886b90840871ecb2426c8f45689866fae395a0e1fdcd905dc90968d1'
+            'fa6d5ae6b8f8e126bd6811d4d8f947739fbc95400333740344e2f0b9f27b184a'
             '26c0482fb80651519cc49af0c646e3a5ab612b61b9bdc08c2a4558d452b31435'
             '2eb199f510340cf8d190ba2fa80d5bdcf1e2e7ca53e8011af2ee62ea3b8dd03b'
             'a97ddf6694fa5070463a2d3f997205436a63fbe125071dd1bef0d59999adff70'
@@ -423,7 +423,7 @@ package_update-grub() {
 
 package_install-grub() {
 	pkgdesc="GNU Grub (2) Install Script on Updates"
-	depends=(coreutils gawk grep grub)
+	depends=(coreutils efibootmgr gawk grep grub)
 	optdepends=()
 	provides=()
 	conflicts=()

@@ -1,12 +1,9 @@
 # Maintainer: Philip Müller <philm[at]manjaro[dot]org>
 # Maintainer: Stefano Capitani <stefano[at]manjaro[dot]org>
 # Contributor: Helmut Stult
-
-# Arch credits:
-# Based on the file created for Arch Linux by:
-# Contributor : Christian Hesse <mail@eworm.de>
-# Contributor : Ronald van Haren <ronald.archlinux.org>
+# Contributor: Christian Hesse <mail@eworm.de>
 # Contributor: Tobias Powalowski <tpowa@archlinux.org>
+# Contributor: Ronald van Haren <ronald.archlinux.org>
 # Contributor: Keshav Amburay <(the ddoott ridikulus ddoott rat) (aatt) (gemmaeiil) (ddoott) (ccoomm)>
 
 ## "1" to enable IA32-EFI build in Arch x86_64, "0" to disable
@@ -27,12 +24,10 @@ pkgbase=grub
 pkgname=('grub' 'update-grub' 'install-grub')
 #pkgname=('install-grub')
 pkgdesc="GNU GRand Unified Bootloader (2)"
-_unifont_ver='15.1.04'
-_tag='03e6ea18f6f834f177cad017279bedbb0a3de594' # git rev-parse grub-${_pkgver}
 _pkgver=2.12
 _unifont_ver='15.1.05'
 pkgver=${_pkgver/-/}
-pkgrel=3.10
+pkgrel=4
 arch=('x86_64' 'aarch64')
 url='https://www.gnu.org/software/grub/'
 license=('GPL-3.0-or-later')
@@ -67,7 +62,7 @@ validpgpkeys=('E53D497F3FA42AD8C9B4D1E835A93B74E82E4209'  # Vladimir 'phcoder' S
               'BE5C23209ACDDACEB20DB0A28C8189F1988C2166'  # Daniel Kiper <dkiper@net-space.pl>
               '95D2E9AB8740D8046387FD151A09227B1F435A33') # Paul Hardy <unifoundry@unifoundry.com>
 
-source=("git+https://git.savannah.gnu.org/git/grub.git#tag=${_tag}" #?signed"
+source=("git+https://git.savannah.gnu.org/git/grub.git#tag=grub-${_pkgver}?signed"
         'git+https://git.savannah.gnu.org/git/gnulib.git'
         "https://ftp.gnu.org/gnu/unifont/unifont-${_unifont_ver}/unifont-${_unifont_ver}.bdf.gz"{,.sig}
         '0001-00_header-add-GRUB_COLOR_-variables.patch'

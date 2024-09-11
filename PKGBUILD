@@ -30,7 +30,7 @@ pkgdesc='GNU GRand Unified Bootloader (2)'
 _pkgver=2.12
 _unifont_ver='16.0.01'
 pkgver=${_pkgver/-/}
-pkgrel=5
+pkgrel=6
 url='https://www.gnu.org/software/grub/'
 arch=('x86_64' 'aarch64')
 license=('GPL-3.0-or-later')
@@ -97,7 +97,7 @@ if [[ "${_GRUB_EMU_BUILD}" == "1" ]]; then
   sdl
   )
   optdepends+=(
-  'libusbx: For grub-emu USB support'
+  'libusb: For grub-emu USB support'
   'sdl: For grub-emu SDL support'
   )
 fi

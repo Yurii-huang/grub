@@ -30,7 +30,7 @@ pkgdesc='GNU GRand Unified Bootloader (2)'
 _pkgver=2.12
 _unifont_ver='16.0.01'
 pkgver=${_pkgver/-/}
-pkgrel=6
+pkgrel=7
 url='https://www.gnu.org/software/grub/'
 arch=('x86_64' 'aarch64')
 license=('GPL-3.0-or-later')
@@ -38,6 +38,7 @@ backup=(
   etc/default/grub
   etc/grub.d/40_custom
 )
+install="${pkgname}.install"
 options=('!makeflags')
 conflicts=(
   grub-bios

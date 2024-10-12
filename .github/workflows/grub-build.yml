@@ -34,8 +34,8 @@ jobs:
       - name: Import public gpg key
         shell: shell
         run: |
-          su - builder -c "gpg --recv-key 8C8189F1988C2166 && gpg --recv-key 1A09227B1F435A33"
-      - name: Build bash
+          su - builder -c "gpg --recv-key 8C8189F1988C2166 1A09227B1F435A33"
+      - name: Build grub
         shell: bash
         working-directory: ${{ env.workdir }}/src
         run: |

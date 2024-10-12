@@ -32,7 +32,7 @@ jobs:
           sed -i "s/MAKEFLAGS=\"-j2\"/MAKEFLAGS=\"-j8\"/g" /etc/makepkg.conf
           su - builder -c "git clone https://github.com/${{ github.repository }}.git -b  ${GITHUB_REF##*/} src"
       - name: Import public gpg key
-        shell: shell
+        shell: bash
         run: |
           su - builder -c "gpg --recv-key 8C8189F1988C2166 1A09227B1F435A33"
       - name: Build grub

@@ -25,19 +25,28 @@ jobs:
         working-directory: ${{ env.workdir }}
         run: |
           sudo pacman -Sy base-devel git autogen freetype2 fuse3 help2man rsync ttf-dejavu sdl sudo --noconfirm
+      
       - name: Clone repos
         shell: bash
         working-directory: ${{ env.workdir }}
         run: |
           sed -i "s/MAKEFLAGS=\"-j2\"/MAKEFLAGS=\"-j8\"/g" /etc/makepkg.conf
           su - builder -c "git clone https://github.com/${{ github.repository }}.git -b  ${GITHUB_REF##*/} src"
+  
       - name: Import public gpg key
         shell: bash
         run: |
           su - builder -c "gpg --recv-key 8C8189F1988C2166 1A09227B1F435A33"
+  
+      - name: Build
+        shell: bash
+        working-directory: ${{ env.workdir }}/src
+        run: |
+          su - builder -c "cd /builder/src && makepkg PKGBUILD"
+      
       - name: Sign
         shell: bash
-        working-directory: ${{ env.workdir }}
+        working-directory: ${{ env.workdir }}/src
         run: |
           if [ -z "${{ secrets.CALONG_GPG_PRI }}" ] || [ -z "${{ secrets.CALONG_GPG_PASSWD }}" ]; then
               echo "## gpg credentials not provided. Skip signing."
@@ -48,11 +57,7 @@ jobs:
                 gpg --pinentry-mode loopback --passphrase "${{ secrets.CALONG_GPG_PASSWD }}" --detach-sign ${p}
               done
           fi
-      - name: Build
-        shell: bash
-        working-directory: ${{ env.workdir }}/src
-        run: |
-          su - builder -c "cd /builder/src && makepkg PKGBUILD"
+
       - name: Upload packages
         uses: actions/upload-artifact@v4
         with:
